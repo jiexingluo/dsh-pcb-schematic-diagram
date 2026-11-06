@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "PCB Schematic Diagram",
+    "description": "在侧边栏查看 .diagram 原理示意图，支持缩放、滚动和适应窗口。"
+  }
+}

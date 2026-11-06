@@ -1,0 +1,102 @@
+{
+  "name": "dsh-pcb-schematic-diagram",
+  "version": "0.1.0",
+  "description": "PCB Schematic Diagram viewer for DeepSeek Harness with zoom, fit and isolated SVG rendering",
+  "type": "module",
+  "license": "MIT",
+  "author": "jiexingluo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jiexingluo/dsh-pcb-schematic-diagram.git"
+  },
+  "homepage": "https://github.com/jiexingluo/dsh-pcb-schematic-diagram#readme",
+  "bugs": {
+    "url": "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/issues"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "pcb",
+    "schematic",
+    "diagram",
+    "svg"
+  ],
+  "engines": {
+    "node": ">=24.9.0",
+    "dsh": "0.2.2-rc.1"
+  },
+  "main": "./lib/index.js",
+  "types": "./lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "types": "./lib/types/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./cordis.patch.yml": "./cordis.patch.yml"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "lib/DOMPURIFY-LICENSE",
+    "lib/types/**/*.d.ts",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "README.md",
+    "README.zh.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-sidebar-documentpreview",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-renderer"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs && tsc -p tsconfig.types.json",
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run check && npm test",
+    "verify:package": "node scripts/verify-package.mjs"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "4.1.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.1.0",
+    "@deepseek-ai/dsh-client-locale": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-primitives": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-renderer": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-sidebar-documentpreview": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-slots": "0.2.2-rc.1",
+    "@types/node": "^24.0.0",
+    "@types/react": "~18.3.0",
+    "dompurify": "3.4.16",
+    "esbuild": "^0.27.0",
+    "jsdom": "29.1.1",
+    "lightningcss": "^1.33.0",
+    "react": "18.3.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

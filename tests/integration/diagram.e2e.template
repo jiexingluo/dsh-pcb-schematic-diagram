@@ -1,0 +1,115 @@
+/** Exercise the installed package through DSH's real right-sidebar document owner. */
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { chromium } from 'playwright'
+import { expect, it } from 'vitest'
+import { launchWebScaffold, webSnapshotMode } from './scaffold.ts'
+import { connectFreshWorkspace, newEnglishPage } from './support.ts'
+
+const root = fileURLToPath(new URL('../../../', import.meta.url))
+const pluginDirectory = PLUGIN_DIRECTORY
+const synthetic = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1980 1120">
+<title>Generated test schematic</title><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="5"><path d="M0 0L10 5L0 10Z"/></marker></defs>
+<style>.wire{stroke:#207f5d;stroke-width:3;fill:none}.label{font:24px sans-serif;fill:#203040}</style>
+<rect x="20" y="20" width="1940" height="1080" fill="white" stroke="gray"/>
+<path class="wire" marker-end="url(#arrow)" d="M100 300H1600"/><text class="label" x="100" y="200">Instrument → Relay → DUT</text></svg>`
+
+it.skipIf(webSnapshotMode() === 'record')('previews schematic diagrams, preserves markers, scrolls and reloads through the standalone plugin', async () => {
+  const scaffold = await launchWebScaffold({
+    replayFixture: join(root, 'snapshots/web/lifecycle-chrome/session.v3.jsonl'),
+    compareReplaySession: false, paceMs: 5,
+    profile: { packages: [{ dir: pluginDirectory, enabled: true }] },
+  })
+  const browser = await chromium.launch()
+  try {
+    const page = await newEnglishPage(browser)
+    await page.setViewportSize({ width: 1680, height: 1000 })
+    await page.goto(scaffold.authenticatedUrl)
+    await connectFreshWorkspace(page, scaffold.workspaceCwd)
+    const settled = scaffold.whenTurnSettled()
+    const input = page.locator('[data-composer-input]').first()
+    await input.fill('Reply with the single word LIGHTHOUSE and stop.')
+    await input.press('Enter')
+    const sessionId = await settled
+    const cwd = scaffold.ctx.agents.get(sessionId)?.session.header.cwd
+    if (!cwd) throw new Error('Session has no workspace')
+    const sample = process.env.DSH_DIAGRAM_SAMPLE
+    const content = sample ? await readFile(sample, 'utf8') : synthetic
+    await writeFile(join(cwd, 'schematic.diagram'), content)
+    await writeFile(join(cwd, 'invalid.diagram'), '<svg>broken')
+    await writeFile(join(cwd, 'hostile.diagram'), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><script>window.parent.__diagramScriptExecuted=true</script><image href="https://example.invalid/diagram-image"/><style>@import url("https://example.invalid/diagram-css");</style><text x="5" y="20">Isolated diagram</text></svg>`)
+    await page.getByText('LIGHTHOUSE', { exact: true }).waitFor()
+    const column = page.locator('[data-rightbar-col]')
+    await page.locator('[data-sidebar-right-expand]').click()
+    await column.locator('[data-sidebar-right-guide-entry="files"]').click()
+    await column.locator('[data-files-state="tree"]').waitFor()
+    const preview = column.locator('[data-textpreview-url]:visible')
+    const open = async (name: string) => {
+      const toggle = column.locator('[data-files-navigator-toggle]:visible')
+      if (await toggle.count() && !await column.locator('[data-files-navigator]:visible').count()) await toggle.click()
+      await column.locator('[data-files-entry="file"]').getByRole('button', { name, exact: true }).click()
+      if (await column.locator('[data-files-navigator]:visible').count()) await toggle.click()
+    }
+    await open('schematic.diagram')
+    const frame = preview.frameLocator('iframe[title="PCB Schematic Diagram"]')
+    const svg = frame.locator('svg')
+    await expect.poll(() => svg.getAttribute('viewBox')).toBe('0 0 1980 1120')
+    await expect.poll(() => preview.getByRole('button', { name: 'Actual size', exact: true }).isEnabled()).toBe(true)
+    expect(await frame.locator('marker').count()).toBeGreaterThan(0)
+    expect(await svg.evaluate(node => [...node.querySelectorAll('path,line,polyline')]
+      .some(path => getComputedStyle(path).markerEnd !== 'none'))).toBe(true)
+    expect(await frame.locator('text').count()).toBeGreaterThan(0)
+    const output = join(pluginDirectory, 'output/playwright/diagram-validation')
+    await mkdir(output, { recursive: true })
+    await page.screenshot({ path: join(output, sample ? 'sample-fit-light.png' : 'synthetic-fit-light.png') })
+    await preview.getByRole('button', { name: 'Actual size', exact: true }).click()
+    await preview.getByText('100%', { exact: true }).waitFor()
+    expect(await svg.evaluate(node => node.getBoundingClientRect().width)).toBe(1980)
+    await svg.evaluate(node => { node.ownerDocument.defaultView!.scrollTo(300, 120) })
+    expect(await svg.evaluate(node => node.ownerDocument.scrollingElement!.scrollLeft)).toBe(300)
+    const wheel = () => svg.evaluate(node => {
+      const viewport = node.ownerDocument.scrollingElement!
+      const before = (viewport.scrollLeft + 180 - 16) / (node.getBoundingClientRect().width / 1980)
+      node.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -100, clientX: 180, clientY: 140 }))
+      const after = (viewport.scrollLeft + 180 - 16) / (node.getBoundingClientRect().width / 1980)
+      return Math.abs(after - before)
+    })
+    expect(await wheel()).toBeLessThan(2)
+    await preview.getByText('115%', { exact: true }).waitFor()
+    await preview.locator('[data-textpreview-tool="reload"]').click()
+    await expect.poll(() => preview.getByRole('button', { name: 'Actual size', exact: true }).isEnabled()).toBe(true)
+    await preview.getByRole('button', { name: 'Actual size', exact: true }).click()
+    await preview.getByText('100%', { exact: true }).waitFor()
+    const viewer = preview.locator('[data-document-viewer-menu]')
+    await viewer.click()
+    await page.getByRole('menuitem', { name: 'Plain text', exact: true }).click()
+    await preview.locator('[data-textpreview-line]').first().waitFor()
+    await viewer.click()
+    await page.getByRole('menuitem', { name: 'PCB Schematic Diagram', exact: true }).click()
+    await preview.getByRole('button', { name: 'Fit window', exact: true }).click()
+    const style = await page.addStyleTag({ content: '[data-sidebar-right-panel]{width:360px!important}' })
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect.poll(() => page.locator('body').getAttribute('data-ds-dark-theme')).toBe('')
+    expect(await frame.locator('body').evaluate(node => getComputedStyle(node).backgroundColor)).toBe('rgb(255, 255, 255)')
+    await page.screenshot({ path: join(output, sample ? 'sample-dark-narrow.png' : 'synthetic-dark-narrow.png') })
+    await style.evaluate(node => node.remove())
+    await open('invalid.diagram')
+    await preview.getByRole('alert').filter({ hasText: 'Cannot preview this schematic diagram' }).waitFor()
+    const externalResponses: string[] = []
+    const blocked: string[] = []
+    page.on('response', response => { if (response.url().includes('example.invalid')) externalResponses.push(response.url()) })
+    page.on('requestfailed', request => { if (request.url().includes('example.invalid')) blocked.push(request.failure()?.errorText ?? '') })
+    await open('hostile.diagram')
+    const isolated = preview.frameLocator('iframe[title="PCB Schematic Diagram"]')
+    await isolated.getByText('Isolated diagram').waitFor()
+    expect(await isolated.locator('script, [href]').count()).toBe(0)
+    expect(externalResponses).toEqual([])
+    expect(blocked.length).toBeGreaterThan(0)
+    expect(blocked.every(reason => /csp|blocked/iu.test(reason))).toBe(true)
+    expect(await page.evaluate(() => '__diagramScriptExecuted' in window)).toBe(false)
+  } finally {
+    await browser.close()
+    await scaffold.close()
+  }
+})
