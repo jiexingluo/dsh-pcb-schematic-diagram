@@ -1,6 +1,6 @@
 {
   "name": "dsh-pcb-schematic-diagram",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "PCB Schematic Diagram viewer for DeepSeek Harness with zoom, fit and isolated SVG rendering",
   "type": "module",
   "license": "MIT",
@@ -63,13 +63,16 @@
       "inject": [
         "@deepseek-ai/dsh-client-ui-sidebar-documentpreview",
         "@deepseek-ai/dsh-client-locale",
-        "@deepseek-ai/dsh-client-ui-renderer"
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-api-session-controller",
+        "@deepseek-ai/dsh-client-ui-sidebar-right",
+        "@deepseek-ai/dsh-client-connection"
       ]
     }
   },
   "scripts": {
-    "build": "node scripts/build.mjs && tsc -p tsconfig.types.json",
-    "check": "tsc --noEmit",
+    "build": "node scripts/build.mjs && tsc -p tsconfig.types.host.json && tsc -p tsconfig.types.json",
+    "check": "tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.client.json --noEmit",
     "test": "vitest run",
     "prepack": "npm run build",
     "prepublishOnly": "npm run check && npm test",
@@ -80,11 +83,22 @@
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "4.1.0",
+    "@deepseek-ai/dsh-api-session-controller": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-client-connection": "0.2.2-rc.1",
     "@deepseek-ai/dsh-client-locale": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-client-store": "0.2.2-rc.1",
     "@deepseek-ai/dsh-client-ui-primitives": "0.2.2-rc.1",
     "@deepseek-ai/dsh-client-ui-renderer": "0.2.2-rc.1",
     "@deepseek-ai/dsh-client-ui-sidebar-documentpreview": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-client-ui-sidebar-right": "0.2.2-rc.1",
     "@deepseek-ai/dsh-client-ui-slots": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-llm": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-session": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-system-prompt": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-tool-executor-ptc": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-tool-present": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-tools": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-util-workspace-path": "0.2.2-rc.1",
     "@types/node": "^24.0.0",
     "@types/react": "~18.3.0",
     "dompurify": "3.4.16",

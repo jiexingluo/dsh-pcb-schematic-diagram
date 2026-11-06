@@ -11,7 +11,7 @@ Validated with DeepSeek Harness **0.2.2-rc.1**, Node **24.9+**. Compatibility is
 In **Plugins → Add plugin**, enter:
 
 ```text
-https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0/dsh-pcb-schematic-diagram-0.1.0.tgz
+https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz
 ```
 
 Find **PCB Schematic Diagram** in installed plugins. If requested, restart DSH; open a `.diagram` from workspace Files. Web and Desktop have separate plugin profiles: install in the app you use. Sharing sessions does not share installed plugins.
@@ -21,13 +21,19 @@ For a stopped profile, the CLI equivalents are:
 Desktop commands require the `dsh` CLI provided by the installed application. A CLI launched from a DSH source checkout cannot manage the reserved Desktop profile; use the app's Plugins page instead.
 
 ```powershell
-dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0/dsh-pcb-schematic-diagram-0.1.0.tgz"
-dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0/dsh-pcb-schematic-diagram-0.1.0.tgz"
+dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz"
+dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz"
 ```
 
-The repository includes prebuilt `lib/` assets, so a version source archive is also installable: `https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.1.0.tar.gz`. No installation scripts or DSH source modifications are required. This package coexists with `dsh-pcb-resource-map`; each claims only its own extension.
+The repository includes prebuilt `lib/` assets, so a version source archive is also installable: `https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.2.0.tar.gz`. No installation scripts or DSH source modifications are required. This package coexists with `dsh-pcb-resource-map`; each claims only its own extension.
 
 **Not published to npm yet.** The intended package name is `dsh-pcb-schematic-diagram`. A manual npm publication workflow is provided; it requires a repository `NPM_TOKEN` with publish access. Pushes do not publish to npm.
+
+## Automatic preview
+
+From version 0.2.0, successful `write`, `edit` and mutating `str_replace_editor` calls in the foreground session automatically open `.diagram` files in the right sidebar. Nested PTC tool writes are supported too. Updates reuse the existing document, whose file refresh is managed by DSH.
+
+For shell, Python or MCP generators, the host contribution asks the model to call DSH's `present` tool with the final existing file path after successful generation. A successful `present` delivery opens the matching preview. This requires `present` to be enabled and the model to follow the guidance; the plugin does not infer file writes from command output or watch external programs. Read-only calls, failed operations, background sessions, initial history and reconnect/history replay do not open previews. The model guidance is removed when the plugin is disabled.
 
 ## File support and limits
 
@@ -35,7 +41,7 @@ The repository includes prebuilt `lib/` assets, so a version source archive is a
 - Preserves local arrow markers, gradients, CSS, text and fragment references. Rejects malformed XML, DOCTYPEs and missing dimensions. Does not attempt to render malformed raw SVG through an image fallback.
 - Uses DOMPurify and a sandboxed, script-free iframe with a restrictive content policy. External resources, links, script, embedded HTML and animation are blocked. Font rendering depends on fonts available on the machine. The host's full-file read limit applies.
 - Fit mode follows panel resizing until manual zoom. Replacement content resets the viewport; reloading identical bytes keeps the viewer usable.
-- Read-only: no file writes, hardware control, EDA editing, `.SchDoc` parsing or diagram generation. SideTest's workflow-specific automatic opening is not included in this release.
+- Read-only: no file writes, hardware control, EDA editing, `.SchDoc` parsing or diagram generation.
 
 ## Develop
 
@@ -55,6 +61,9 @@ Run a browser replay against a built DSH checkout, without a model API key:
 
 ```powershell
 $env:DSH_CHECKOUT = "D:/CodeBase/deepseek-harness-master"
+node scripts/test-dsh.mjs
+# Optional coexistence check with the other standalone plugin:
+$env:DSH_COMPANION_PLUGIN = "D:/CodeBase/dsh-pcb-resource-map"
 node scripts/test-dsh.mjs
 # Optionally use a local private diagram instead of the synthetic fixture:
 $env:DSH_DIAGRAM_SAMPLE = "C:/path/to/example.diagram"

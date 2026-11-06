@@ -11,6 +11,8 @@ it('registers only diagram files and retires contributions on unload', async () 
   const removeSlot = vi.fn()
   const registerPreview = vi.fn((_options: unknown) => removePreview)
   const registerSlot = vi.fn((_options: unknown) => removeSlot)
+  ctx.provide('connection', { generation: { subscribe: () => () => {}, getSnapshot: () => undefined } } as never)
+  ctx.provide('sidebarRight', { mounted: { subscribe: () => () => {}, getSnapshot: () => undefined } } as never)
   ctx.provide('locale', { register: () => removeLocale, bind: () => () => 'PCB Schematic Diagram' } as never)
   ctx.provide('documentPreviews', { register: registerPreview } as never)
   ctx.provide('slots', {

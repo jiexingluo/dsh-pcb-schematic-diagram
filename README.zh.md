@@ -11,7 +11,7 @@
 在要使用的应用中打开 **插件 → 添加插件**，输入：
 
 ```text
-https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0/dsh-pcb-schematic-diagram-0.1.0.tgz
+https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz
 ```
 
 在已安装插件中找到 **PCB Schematic Diagram**，按提示重启后，从工作区 Files 打开 `.diagram`。Web 与 Desktop 的插件配置独立，需要分别安装；会话记录共享不代表插件共享。
@@ -21,13 +21,19 @@ https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0
 Desktop 命令必须使用安装版提供的 `dsh`。从 DSH 源码启动的 CLI 无权管理 Desktop 保留配置；也可以直接使用安装版的插件页面。
 
 ```powershell
-dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0/dsh-pcb-schematic-diagram-0.1.0.tgz"
-dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0/dsh-pcb-schematic-diagram-0.1.0.tgz"
+dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz"
+dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz"
 ```
 
-仓库提交 `lib/` 构建产物，也可以安装版本源码压缩包：`https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.1.0.tar.gz`。安装不依赖脚本或 DSH 源码。可与 PCB Resource Map 共存，两者分别处理 `.diagram` 和 `.resmap`。
+仓库提交 `lib/` 构建产物，也可以安装版本源码压缩包：`https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.2.0.tar.gz`。安装不依赖脚本或 DSH 源码。可与 PCB Resource Map 共存，两者分别处理 `.diagram` 和 `.resmap`。
 
 **尚未发布到 npm。** 拟用包名为 `dsh-pcb-schematic-diagram`。仓库已提供手动发布流程，需要配置有发布权限的 `NPM_TOKEN`；普通推送不会发布 npm。
+
+## 自动打开预览
+
+从 0.2.0 开始，当前会话成功执行 `write`、`edit` 或修改文件的 `str_replace_editor` 后，会在右侧自动打开 `.diagram`。也支持 PTC 中嵌套调用这些工具。更新同一文件会复用已有文档，内容刷新沿用 DSH。
+
+通过 Shell、Python 或 MCP 生成时，插件会提示模型在成功后调用 DSH 的 `present` 工具，提交最终已存在的文件路径，再打开对应预览。这需要启用 `present` 且模型遵循提示；插件不从命令输出猜测文件路径，也不监听外部程序。读取文件、执行失败、后台会话、首次加载历史及重连回放不会触发打开。禁用插件后，相应模型提示也会移除。
 
 ## 格式与范围
 
@@ -35,7 +41,7 @@ dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schemati
 - 保留文字、箭头、渐变、CSS 和内部片段引用。无效 XML、DOCTYPE 和无有效尺寸的文件显示错误，不直接嵌入未经清理的内容。
 - 使用 DOMPurify 清理后置于禁止脚本的沙箱 iframe，阻止外部资源、脚本、嵌入 HTML、链接和动画。字体依赖本机可用字体，文件大小受 Host 完整读取上限约束。
 - 适应窗口模式随面板尺寸变化，手动缩放后停止自动适应。内容变化时重置视口，重复加载相同内容后控件仍可用。
-- 只读，不修改图纸、不控制硬件、不提供 `.SchDoc` 解析或图纸生成。本版不包含 SideTest 工作流专用的生成后自动打开。
+- 只读，不修改图纸、不控制硬件、不提供 `.SchDoc` 解析或图纸生成。
 
 ## 开发和验证
 
@@ -55,6 +61,9 @@ npm pack
 
 ```powershell
 $env:DSH_CHECKOUT = "D:/CodeBase/deepseek-harness-master"
+node scripts/test-dsh.mjs
+# 可选：同时加载另一个独立插件，验证两者共存
+$env:DSH_COMPANION_PLUGIN = "D:/CodeBase/dsh-pcb-resource-map"
 node scripts/test-dsh.mjs
 # 可选：用本地文件替代内置的合成测试图
 $env:DSH_DIAGRAM_SAMPLE = "C:/path/to/example.diagram"

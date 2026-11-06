@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.client.json",
   "compilerOptions": { "noEmit": false, "declaration": true, "emitDeclarationOnly": true, "rootDir": "src", "outDir": "lib/types" },
-  "include": ["src"]
+  "include": ["src/client", "src/css-modules.d.ts"]
 }

@@ -4,6 +4,9 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 import { expect, it } from 'vitest'
+import { ToolCallId, createToolResultMessage } from '@deepseek-ai/dsh-llm'
+import type {} from '@deepseek-ai/dsh-tool-present/types'
+import type {} from '@deepseek-ai/dsh-tool-executor-ptc/types'
 import { launchWebScaffold, webSnapshotMode } from './scaffold.ts'
 import { connectFreshWorkspace, newEnglishPage } from './support.ts'
 
@@ -19,7 +22,8 @@ it.skipIf(webSnapshotMode() === 'record')('previews schematic diagrams, preserve
   const scaffold = await launchWebScaffold({
     replayFixture: join(root, 'snapshots/web/lifecycle-chrome/session.v3.jsonl'),
     compareReplaySession: false, paceMs: 5,
-    profile: { packages: [{ dir: pluginDirectory, enabled: true }] },
+    profile: { packages: [pluginDirectory, ...(process.env.DSH_COMPANION_PLUGIN ? [process.env.DSH_COMPANION_PLUGIN] : [])]
+      .map(dir => ({ dir, enabled: true })) },
   })
   const browser = await chromium.launch()
   try {
@@ -32,7 +36,8 @@ it.skipIf(webSnapshotMode() === 'record')('previews schematic diagrams, preserve
     await input.fill('Reply with the single word LIGHTHOUSE and stop.')
     await input.press('Enter')
     const sessionId = await settled
-    const cwd = scaffold.ctx.agents.get(sessionId)?.session.header.cwd
+    const session = scaffold.ctx.agents.get(sessionId)!.session
+    const cwd = session.header.cwd
     if (!cwd) throw new Error('Session has no workspace')
     const sample = process.env.DSH_DIAGRAM_SAMPLE
     const content = sample ? await readFile(sample, 'utf8') : synthetic
@@ -41,17 +46,20 @@ it.skipIf(webSnapshotMode() === 'record')('previews schematic diagrams, preserve
     await writeFile(join(cwd, 'hostile.diagram'), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><script>window.parent.__diagramScriptExecuted=true</script><image href="https://example.invalid/diagram-image"/><style>@import url("https://example.invalid/diagram-css");</style><text x="5" y="20">Isolated diagram</text></svg>`)
     await page.getByText('LIGHTHOUSE', { exact: true }).waitFor()
     const column = page.locator('[data-rightbar-col]')
-    await page.locator('[data-sidebar-right-expand]').click()
-    await column.locator('[data-sidebar-right-guide-entry="files"]').click()
-    await column.locator('[data-files-state="tree"]').waitFor()
     const preview = column.locator('[data-textpreview-url]:visible')
+    let callNumber = 0
+    const written = (path: string, isError = false) => {
+      const callId = ToolCallId(`diagram-auto-${++callNumber}`)
+      const source = session.append('tool/call', { turn: 1, step: 1, callId, name: 'write', arguments: JSON.stringify({ file_path: path, content: '<svg/>' }) })
+      session.append('tool/result', { turn: 1, step: 1, message: createToolResultMessage({ callId, content: [], isError }), meta: { path } }, { surfaceOp: 'append', sourceEventSeqs: [source.seq] })
+    }
+    written(join(cwd, 'schematic.diagram'))
     const open = async (name: string) => {
       const toggle = column.locator('[data-files-navigator-toggle]:visible')
       if (await toggle.count() && !await column.locator('[data-files-navigator]:visible').count()) await toggle.click()
       await column.locator('[data-files-entry="file"]').getByRole('button', { name, exact: true }).click()
       if (await column.locator('[data-files-navigator]:visible').count()) await toggle.click()
     }
-    await open('schematic.diagram')
     const frame = preview.frameLocator('iframe[title="PCB Schematic Diagram"]')
     const svg = frame.locator('svg')
     await expect.poll(() => svg.getAttribute('viewBox')).toBe('0 0 1980 1120')
@@ -60,6 +68,18 @@ it.skipIf(webSnapshotMode() === 'record')('previews schematic diagrams, preserve
     expect(await svg.evaluate(node => [...node.querySelectorAll('path,line,polyline')]
       .some(path => getComputedStyle(path).markerEnd !== 'none'))).toBe(true)
     expect(await frame.locator('text').count()).toBeGreaterThan(0)
+    const updated = content.replace('</svg>', '<text x="40" y="1080">Automatic update confirmed</text></svg>')
+    await writeFile(join(cwd, 'schematic.diagram'), updated)
+    session.append('tool/ptc-dispatch', { rootCallId: ToolCallId('ptc-root'), parentCallId: ToolCallId('ptc-root'), subCallId: ToolCallId('ptc-write'),
+      name: 'write', arguments: { file_path: join(cwd, 'schematic.diagram'), content: updated }, isError: false, content: [], meta: { path: join(cwd, 'schematic.diagram') } })
+    await frame.getByText('Automatic update confirmed', { exact: true }).waitFor()
+    if (process.env.DSH_COMPANION_PLUGIN) {
+      await writeFile(join(cwd, 'companion.resmap'), '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><text x="10" y="40">Companion map</text></svg>')
+      written(join(cwd, 'companion.resmap'))
+      await preview.frameLocator('iframe[title="PCB Resource Map"]').getByText('Companion map', { exact: true }).waitFor()
+      written(join(cwd, 'schematic.diagram'))
+      await frame.getByText('Automatic update confirmed', { exact: true }).waitFor()
+    }
     const output = join(pluginDirectory, 'output/playwright/diagram-validation')
     await mkdir(output, { recursive: true })
     await page.screenshot({ path: join(output, sample ? 'sample-fit-light.png' : 'synthetic-fit-light.png') })
@@ -94,7 +114,7 @@ it.skipIf(webSnapshotMode() === 'record')('previews schematic diagrams, preserve
     expect(await frame.locator('body').evaluate(node => getComputedStyle(node).backgroundColor)).toBe('rgb(255, 255, 255)')
     await page.screenshot({ path: join(output, sample ? 'sample-dark-narrow.png' : 'synthetic-dark-narrow.png') })
     await style.evaluate(node => node.remove())
-    await open('invalid.diagram')
+    session.append('deliverables/presented', { turn: 1, callId: ToolCallId('diagram-present'), files: [{ path: join(cwd, 'invalid.diagram') }] })
     await preview.getByRole('alert').filter({ hasText: 'Cannot preview this schematic diagram' }).waitFor()
     const externalResponses: string[] = []
     const blocked: string[] = []
