@@ -1,6 +1,6 @@
 {
   "name": "dsh-pcb-schematic-diagram",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "PCB Schematic Diagram viewer for DeepSeek Harness with zoom, fit and isolated SVG rendering",
   "type": "module",
   "license": "MIT",

@@ -11,7 +11,7 @@
 在要使用的应用中打开 **插件 → 添加插件**，输入：
 
 ```text
-https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz
+https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz
 ```
 
 在已安装插件中找到 **PCB Schematic Diagram**，按提示重启后，从工作区 Files 打开 `.diagram`。Web 与 Desktop 的插件配置独立，需要分别安装；会话记录共享不代表插件共享。
@@ -21,11 +21,11 @@ https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0
 Desktop 命令必须使用安装版提供的 `dsh`。从 DSH 源码启动的 CLI 无权管理 Desktop 保留配置；也可以直接使用安装版的插件页面。
 
 ```powershell
-dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz"
-dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz"
+dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz"
+dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz"
 ```
 
-仓库提交 `lib/` 构建产物，也可以安装版本源码压缩包：`https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.2.0.tar.gz`。安装不依赖脚本或 DSH 源码。可与 PCB Resource Map 共存，两者分别处理 `.diagram` 和 `.resmap`。
+仓库提交 `lib/` 构建产物，也可以安装版本源码压缩包：`https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.2.1.tar.gz`。安装不依赖脚本或 DSH 源码。可与 PCB Resource Map 共存，两者分别处理 `.diagram` 和 `.resmap`。
 
 **尚未发布到 npm。** 拟用包名为 `dsh-pcb-schematic-diagram`。仓库已提供手动发布流程，需要配置有发布权限的 `NPM_TOKEN`；普通推送不会发布 npm。
 

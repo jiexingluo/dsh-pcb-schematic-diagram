@@ -11,7 +11,7 @@ Validated with DeepSeek Harness **0.2.2-rc.1**, Node **24.9+**. Compatibility is
 In **Plugins → Add plugin**, enter:
 
 ```text
-https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz
+https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz
 ```
 
 Find **PCB Schematic Diagram** in installed plugins. If requested, restart DSH; open a `.diagram` from workspace Files. Web and Desktop have separate plugin profiles: install in the app you use. Sharing sessions does not share installed plugins.
@@ -21,11 +21,11 @@ For a stopped profile, the CLI equivalents are:
 Desktop commands require the `dsh` CLI provided by the installed application. A CLI launched from a DSH source checkout cannot manage the reserved Desktop profile; use the app's Plugins page instead.
 
 ```powershell
-dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz"
-dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.0/dsh-pcb-schematic-diagram-0.2.0.tgz"
+dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz"
+dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz"
 ```
 
-The repository includes prebuilt `lib/` assets, so a version source archive is also installable: `https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.2.0.tar.gz`. No installation scripts or DSH source modifications are required. This package coexists with `dsh-pcb-resource-map`; each claims only its own extension.
+The repository includes prebuilt `lib/` assets, so a version source archive is also installable: `https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.2.1.tar.gz`. No installation scripts or DSH source modifications are required. This package coexists with `dsh-pcb-resource-map`; each claims only its own extension.
 
 **Not published to npm yet.** The intended package name is `dsh-pcb-schematic-diagram`. A manual npm publication workflow is provided; it requires a repository `NPM_TOKEN` with publish access. Pushes do not publish to npm.
 

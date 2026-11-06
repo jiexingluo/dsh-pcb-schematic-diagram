@@ -24,6 +24,8 @@ await build({
   entryPoints: ['src/client/index.ts'], outfile: 'lib/client.js',
   format: 'cjs', platform: 'browser', target: 'es2022', bundle: true,
   jsx: 'automatic', external, plugins: [cssModules], legalComments: 'inline',
+  // Omit esbuild's module-path comments, which contain platform-specific pnpm directory names.
+  minifyWhitespace: true,
   define: { 'process.env.NODE_ENV': '"production"' },
   banner: { js: `window.__ModuleLoader__.load({id:${JSON.stringify(manifest.name)},factory:(require)=>{const module={exports:{}};const exports=module.exports;` },
   footer: { js: 'return module.exports;}});' },
