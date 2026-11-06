@@ -18,6 +18,8 @@ https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0
 
 目标配置停止运行后，也可以使用命令：
 
+Desktop 命令必须使用安装版提供的 `dsh`。从 DSH 源码启动的 CLI 无权管理 Desktop 保留配置；也可以直接使用安装版的插件页面。
+
 ```powershell
 dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0/dsh-pcb-schematic-diagram-0.1.0.tgz"
 dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0/dsh-pcb-schematic-diagram-0.1.0.tgz"

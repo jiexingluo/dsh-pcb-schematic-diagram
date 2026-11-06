@@ -18,6 +18,8 @@ Find **PCB Schematic Diagram** in installed plugins. If requested, restart DSH; 
 
 For a stopped profile, the CLI equivalents are:
 
+Desktop commands require the `dsh` CLI provided by the installed application. A CLI launched from a DSH source checkout cannot manage the reserved Desktop profile; use the app's Plugins page instead.
+
 ```powershell
 dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0/dsh-pcb-schematic-diagram-0.1.0.tgz"
 dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.1.0/dsh-pcb-schematic-diagram-0.1.0.tgz"
