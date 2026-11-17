@@ -6,12 +6,14 @@
 
 ## 安装
 
-验证版本为 DeepSeek Harness **0.2.2-rc.1**、Node **24.9+**。DSH 插件接口尚未稳定，兼容声明暂时固定为该版本。支持 Web 和 Electron Desktop。
+验证版本为 DeepSeek Harness **0.2.2-rc.3**、Node **24.9+**。DSH 插件接口尚未稳定，兼容声明暂时固定为该版本。支持 Web 和 Electron Desktop。
+
+插件 0.3.0 对应 DSH 0.2.2-rc.3；DSH 0.2.2-rc.1 请使用插件 0.2.1。本次同步更新兼容声明、开发依赖和锁文件，并针对 rc.3 重新构建，已在安装版运行环境中验证预览和自动打开。兼容范围仍限定为经过验证的 DSH 版本；重新安装同一个旧包无法解决版本不匹配。
 
 在要使用的应用中打开 **插件 → 添加插件**，输入：
 
 ```text
-https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz
+https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.3.0/dsh-pcb-schematic-diagram-0.3.0.tgz
 ```
 
 在已安装插件中找到 **PCB Schematic Diagram**，按提示重启后，从工作区 Files 打开 `.diagram`。Web 与 Desktop 的插件配置独立，需要分别安装；会话记录共享不代表插件共享。
@@ -21,11 +23,11 @@ https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1
 Desktop 命令必须使用安装版提供的 `dsh`。从 DSH 源码启动的 CLI 无权管理 Desktop 保留配置；也可以直接使用安装版的插件页面。
 
 ```powershell
-dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz"
-dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz"
+dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.3.0/dsh-pcb-schematic-diagram-0.3.0.tgz"
+dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.3.0/dsh-pcb-schematic-diagram-0.3.0.tgz"
 ```
 
-仓库提交 `lib/` 构建产物，也可以安装版本源码压缩包：`https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.2.1.tar.gz`。安装不依赖脚本或 DSH 源码。可与 PCB Resource Map 共存，两者分别处理 `.diagram` 和 `.resmap`。
+仓库提交 `lib/` 构建产物，也可以安装版本源码压缩包：`https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.3.0.tar.gz`。安装不依赖脚本或 DSH 源码。可与 PCB Resource Map 共存，两者分别处理 `.diagram` 和 `.resmap`。
 
 **尚未发布到 npm。** 拟用包名为 `dsh-pcb-schematic-diagram`。仓库已提供手动发布流程，需要配置有发布权限的 `NPM_TOKEN`；普通推送不会发布 npm。
 

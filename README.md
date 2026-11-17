@@ -6,12 +6,14 @@ An independently installable right-sidebar viewer for `.diagram` files containin
 
 ## Install
 
-Validated with DeepSeek Harness **0.2.2-rc.1**, Node **24.9+**. Compatibility is pinned while DSH's plugin API is pre-stable. Both the browser UI and Electron desktop use this browser contribution.
+Validated with DeepSeek Harness **0.2.2-rc.3**, Node **24.9+**. Compatibility is pinned while DSH's plugin API is pre-stable. Both the browser UI and Electron desktop use this browser contribution.
+
+Version 0.3.0 targets DSH 0.2.2-rc.3; use plugin 0.2.1 for DSH 0.2.2-rc.1. This release updates the compatibility declaration, development dependencies and lockfile, and rebuilds against rc.3. Preview and automatic-opening APIs were verified in the installed application's runtime. Compatibility remains limited to the tested DSH version; reinstalling an older package does not resolve a runtime-version mismatch.
 
 In **Plugins → Add plugin**, enter:
 
 ```text
-https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz
+https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.3.0/dsh-pcb-schematic-diagram-0.3.0.tgz
 ```
 
 Find **PCB Schematic Diagram** in installed plugins. If requested, restart DSH; open a `.diagram` from workspace Files. Web and Desktop have separate plugin profiles: install in the app you use. Sharing sessions does not share installed plugins.
@@ -21,11 +23,11 @@ For a stopped profile, the CLI equivalents are:
 Desktop commands require the `dsh` CLI provided by the installed application. A CLI launched from a DSH source checkout cannot manage the reserved Desktop profile; use the app's Plugins page instead.
 
 ```powershell
-dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz"
-dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.2.1/dsh-pcb-schematic-diagram-0.2.1.tgz"
+dsh plugin --profile web add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.3.0/dsh-pcb-schematic-diagram-0.3.0.tgz"
+dsh plugin --profile desktop add "https://github.com/jiexingluo/dsh-pcb-schematic-diagram/releases/download/v0.3.0/dsh-pcb-schematic-diagram-0.3.0.tgz"
 ```
 
-The repository includes prebuilt `lib/` assets, so a version source archive is also installable: `https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.2.1.tar.gz`. No installation scripts or DSH source modifications are required. This package coexists with `dsh-pcb-resource-map`; each claims only its own extension.
+The repository includes prebuilt `lib/` assets, so a version source archive is also installable: `https://github.com/jiexingluo/dsh-pcb-schematic-diagram/archive/refs/tags/v0.3.0.tar.gz`. No installation scripts or DSH source modifications are required. This package coexists with `dsh-pcb-resource-map`; each claims only its own extension.
 
 **Not published to npm yet.** The intended package name is `dsh-pcb-schematic-diagram`. A manual npm publication workflow is provided; it requires a repository `NPM_TOKEN` with publish access. Pushes do not publish to npm.
 
