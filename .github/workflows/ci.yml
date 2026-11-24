@@ -21,3 +21,32 @@ jobs:
         with:
           name: dsh-pcb-schematic-diagram-package
           path: '*.tgz'
+  compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dsh-version: [0.2.2-rc.3, 0.2.2-rc.5]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.28.5
+      - run: pnpm install --frozen-lockfile
+      - name: Select DSH API version
+        env:
+          DSH_TEST_VERSION: ${{ matrix.dsh-version }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs'
+          const pkg = JSON.parse(readFileSync('package.json', 'utf8'))
+          for (const name of Object.keys(pkg.devDependencies)) {
+            if (name.startsWith('@deepseek-ai/dsh-')) pkg.devDependencies[name] = process.env.DSH_TEST_VERSION
+          }
+          writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n')
+          NODE
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm run check && pnpm test && pnpm run verify:package
